@@ -1,0 +1,10 @@
+{
+  "projects": {
+    "DebateTimerMariscalCastilla": {
+      "rootDirectory": "DebateTimerMariscalCastilla"
+    },
+    "DebateTimerGelicich": {
+      "rootDirectory": "DebateTimerGelicich"
+    }
+  }
+}
