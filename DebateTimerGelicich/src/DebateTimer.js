@@ -12,7 +12,8 @@ function DebateTimer({ category, times, onBack }) {
   const [bgColor, setBgColor] = useState('#ffffff');
   const [current, setCurrent] = useState(0);
   const [elapsed, setElapsed] = useState(0);
-  const [running, setRunning] = useState(true);
+  const [running, setRunning] = useState(false);
+  const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
   const [savedTimes, setSavedTimes] = useState(Array(times.length).fill(null));
   const audioRef = useRef(null);
@@ -20,7 +21,7 @@ function DebateTimer({ category, times, onBack }) {
   const currentDuration = times[current].minutes * 60;
   const label = times[current].label.toLowerCase();
 
-  const isConclusion = label.includes('conclusión') || label.includes('réplica');
+  const isConclusion = label.includes('cierre') || label.includes('réplica');
 
   const playBell = (repeat = 1) => {
     if (!audioRef.current) return;
@@ -91,17 +92,26 @@ function DebateTimer({ category, times, onBack }) {
     if (savedTimes[current] !== null) {
       setElapsed(savedTimes[current]);
       setFinished(true);
+      setStarted(true); // Si ya hay tiempo guardado, marcar como iniciado
     } else {
       setElapsed(0);
       setFinished(false);
+      setStarted(false); // Resetear started para mostrar botón "Iniciar"
     }
+    setRunning(false); // Siempre pausar al cambiar de turno
   }, [current]);
+
+  // Función para iniciar el timer
+  const handleStart = () => {
+    setStarted(true);
+    setRunning(true);
+  };
 
   const handleNext = () => {
     if (current < times.length - 1) {
       stopBell();
       setCurrent(current + 1);
-      setRunning(true);
+      // No establecer running aquí - se manejará en el useEffect
     }
   };
 
@@ -109,7 +119,7 @@ function DebateTimer({ category, times, onBack }) {
     if (current > 0) {
       stopBell();
       setCurrent(current - 1);
-      setRunning(true);
+      // No establecer running aquí - se manejará en el useEffect
     }
   };
 
@@ -120,6 +130,7 @@ function DebateTimer({ category, times, onBack }) {
     updated[current] = elapsed;
     setSavedTimes(updated);
     setFinished(true);
+    setRunning(false);
     stopBell();
   };
 
@@ -130,7 +141,8 @@ function DebateTimer({ category, times, onBack }) {
     setSavedTimes(updated);
     setElapsed(0);
     setFinished(false);
-    setRunning(true);
+    setStarted(false); // Resetear started para mostrar botón "Iniciar"
+    setRunning(false);
   };
 
   let timerClass = 'timer';
@@ -146,6 +158,7 @@ function DebateTimer({ category, times, onBack }) {
           <button className="inicio-btn" onClick={() => window.location.reload()}>Inicio</button>
         </div>
       </header>
+      
       <div className="timer-section">
         <div className={timerClass}>
           <span className="timer-label">{times[current].label}</span>
@@ -157,13 +170,35 @@ function DebateTimer({ category, times, onBack }) {
           </span>
         </div>
         <audio ref={audioRef} src={bellUrl} preload="auto" />
+        
         <div className="timer-controls">
           <button onClick={handlePrev} disabled={current === 0}>&larr;</button>
-          <button onClick={handlePause}>{running ? 'Pausar' : 'Reanudar'}</button>
-          <button onClick={handleFinish}>Finalizar turno</button>
-          <button onClick={handleReset}>Reiniciar</button>
+          
+          {!started ? (
+            <button onClick={handleStart} className="start-btn">Iniciar</button>
+          ) : (
+            <button onClick={handlePause}>{running ? 'Pausar' : 'Reanudar'}</button>
+          )}
+          
+          <button 
+            onClick={handleFinish} 
+            disabled={!started}
+            className={!started ? 'disabled-btn' : ''}
+          >
+            Finalizar turno
+          </button>
+          
+          <button 
+            onClick={handleReset}
+            disabled={!started}
+            className={!started ? 'disabled-btn' : ''}
+          >
+            Reiniciar
+          </button>
+          
           <button onClick={handleNext} disabled={current === times.length - 1}>&rarr;</button>
         </div>
+        
         <div className="slider-section">
           <input type="range" min={0} max={times.length - 1} value={current} onChange={(e) => setCurrent(Number(e.target.value))} />
           <div className="slider-labels">
