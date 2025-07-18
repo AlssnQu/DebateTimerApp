@@ -153,7 +153,7 @@ function DebateTimer({ category, times, onBack }) {
       <button className="flecha-btn" onClick={onBack}>&larr;</button>
       <h2>{category}</h2>
       <header className="main-header">
-        <img src={process.env.PUBLIC_URL + '/gelicichLogoGrande.png'} alt="Logo" className="logo" />
+        <img src={process.env.PUBLIC_URL + '/castillaLogo.png'} alt="Logo" className="logo" />
         <div className="header-buttons">
           <button className="inicio-btn" onClick={() => window.location.reload()}>Inicio</button>
         </div>
