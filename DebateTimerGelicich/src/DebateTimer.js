@@ -61,12 +61,24 @@ function DebateTimer({ category, times, onBack }) {
     setBgColor(color);
   }, [elapsed, currentDuration, isConclusion]);
 
-  //Alertas
-  useEffect(() => {
-    if (!running || isConclusion) return;
+//Alertas
+useEffect(() => {
+  if (!running) return;
 
-    const overTime = elapsed - currentDuration;
+  const overTime = elapsed - currentDuration;
 
+  if (isConclusion) {
+    if (elapsed === currentDuration) {
+      playBell(1);
+    }
+    if (elapsed === currentDuration + 15) {
+      playBell(2);
+    }
+    if (overTime >= 20 && [20, 25, 30, 35].includes(overTime)) {
+      playBell(1);
+    }
+  } else {
+    // Para participaciones normales 
     if (elapsed === 60 || elapsed === currentDuration - 60 || elapsed === currentDuration) {
       playBell(1);
     }
@@ -78,12 +90,12 @@ function DebateTimer({ category, times, onBack }) {
     if (overTime > 15 && overTime % 10 === 0) {
       playBell(2);
     }
+  }
+}, [elapsed, running, currentDuration, isConclusion]);
 
-  }, [elapsed, running, currentDuration, isConclusion]);
-
-  useEffect(() => {
-    if (!running || finished) return;
-    const timer = setTimeout(() => setElapsed(e => e + 1), 1000);
+useEffect(() => {
+  if (!running || finished) return;
+  const timer = setTimeout(() => setElapsed(e => e + 1), 1000);
     return () => clearTimeout(timer);
   }, [elapsed, running, finished]);
 
@@ -111,7 +123,6 @@ function DebateTimer({ category, times, onBack }) {
     if (current < times.length - 1) {
       stopBell();
       setCurrent(current + 1);
-      // No establecer running aquí - se manejará en el useEffect
     }
   };
 
@@ -119,7 +130,6 @@ function DebateTimer({ category, times, onBack }) {
     if (current > 0) {
       stopBell();
       setCurrent(current - 1);
-      // No establecer running aquí - se manejará en el useEffect
     }
   };
 
